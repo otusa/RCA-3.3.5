@@ -1,0 +1,9 @@
+## Interface: 30300
+## OptionalDeps: Ace3
+## SavedVariables: RCASettings
+## Title: RCA
+## Notes: Announces group members spell casts in chat
+## Author: otusa
+## Version: 1.2
+
+RaidCooldownAnnouncer.lua

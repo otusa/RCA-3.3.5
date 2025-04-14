@@ -1,5 +1,11 @@
 # Raid Cooldown Announcer (RCA) - 3.3.5a Addon
 
+**IMPORTANT INSTALLATION NOTE:** When downloading from GitHub (e.g., via "Download ZIP"), the main folder inside the ZIP might have `-main` or similar appended to its name. **You MUST rename this folder** to exactly `RaidCooldownAnnouncer` before placing it in your AddOns directory.
+
+The correct path should look like this:
+`World_of_Warcraft_Folder\Interface\AddOns\RaidCooldownAnnouncer\`
+*(Inside this folder should be the `.toc` and `.lua` files)*
+
 ## Overview
 
 Raid Cooldown Announcer (RCA) is a custom World of Warcraft addon designed for the **3.3.5a client**. Its primary purpose is to announce the usage of specific, important raid or party cooldowns in the appropriate chat channel (Party or Raid), helping group members track key abilities during encounters.

@@ -47,6 +47,11 @@ Tired of asking "Who used Innervate?" or missing that clutch BoP? This simple ad
 3.  Place it into your `World of Warcraft\Interface\AddOns\RaidCooldownAnnouncer` directory.
 4.  Make sure it's enabled in the Addons list at your character select screen.
 
+## Requirements
+
+*   World of Warcraft - Wrath of the Lich King (3.3.5a) client.
+*   Ace3 Library (usually included with many addons, but listed as OptionalDeps - make sure you have it!).
+  
 ## Compatibility Notes
 
 *   **Client:** WoW 3.3.5a

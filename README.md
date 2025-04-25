@@ -6,49 +6,48 @@ The correct path should look like this:
 `World_of_Warcraft_Folder\Interface\AddOns\RaidCooldownAnnouncer\`
 *(Inside this folder should be the `.toc` and `.lua` files)*
 
-## Overview
+# RaidCooldownAnnouncer (RCA) for WotLK 3.3.5
 
-Raid Cooldown Announcer (RCA) is a custom World of Warcraft addon designed for the **3.3.5a client**. Its primary purpose is to announce the usage of specific, important raid or party cooldowns in the appropriate chat channel (Party or Raid), helping group members track key abilities during encounters.
 
-This addon was specifically developed and tested on the **'Onyxia' private server (Warmane)** during its TBC phase, which explains some default spell choices (e.g., "Blessing of Protection"). However, it is built using standard 3.3.5a APIs and should be **compatible with most 3.3.5a compliant servers**, though customization of the tracked spell list might be necessary depending on the server's content phase or custom changes.
+Tired of asking "Who used Innervate?" or missing that clutch BoP? This simple addon announces key raid/party cooldowns when they're used, right in chat. No frills, just the info you need.
 
-## Key Features
+## What it Does
 
-*   **Automatic Group Detection:** Intelligently detects whether you are in a Party or a Raid.
-*   **Dynamic Channel Output:** Automatically sends announcements to `/p` (Party) or `/r` (Raid) chat based on your current group type.
-*   **Configurable Activation:**
-    *   Option to **prompt the user** to activate RCA for the current session upon joining a group.
-    *   Option to **auto-activate** based on the master enable toggle when joining a group.
-    *   Master enable/disable toggle via options panel or slash commands.
-*   **Customizable Spell List:**
-    *   Comes with a default list of common utility spells (Innervate, Rebirth, Blessings, Fear Ward, Soulstone).
-    *   Easily **add or remove spells** via the in-game configuration panel. *(Note: Requires exact, case-sensitive spell names as they appear in the combat log)*.
-*   **Filtering Options:**
-    *   Announce **only your own casts**.
-    *   Announce **only casts targeted on you**.
-*   **Duplicate Prevention:** Avoids spamming chat by ignoring rapid, duplicate events for the same spell cast.
-*   **Configuration Panel:**
-    *   Easy-to-use settings panel accessed via `/rca config` or Interface -> AddOns -> RCA.
-    *   Includes status display showing Master/Session state and target channel.
-    *   Options for toggling features, managing spells, and enabling debug mode.
-*   **Profile Management:** Uses AceDBProfiles for creating, managing, copying, and resetting configuration profiles.
-*   **Lightweight:** Built on the Ace3 framework, commonly used by many popular addons.
+*   **Announces Spells:** Tracks specific cooldowns (Innervate, Rebirth, Blessings, Fear Ward, Soulstone Res by default) when used by group members.
+*   **Smart Channel:** Automatically announces to `PARTY` chat in a party, and `RAID` chat in a raid. Handles party-to-raid conversion.
+*   **Configurable:**
+    *   Easily add/remove spells to track via the options panel.
+    *   Toggle announcements on/off (`/rca on`, `/rca off`).
+    *   Optionally announce *only* your own casts.
+    *   Optionally announce *only* casts targeted on you.
+    *   Ask-on-join prompt (or auto-enable if you prefer).
+*   **Simple Interface:** Access options via `/rca config` (Interface Options -> AddOns -> RCA) or use slash commands.
+*   **Duplicate Prevention:** Won't spam chat if the same spell/target combo happens multiple times quickly.
 
-## Configuration & Usage
+## Default Tracked Spells (You can change these!)
 
-1.  **Installation:** Place the `RaidCooldownAnnouncer` folder into your `Interface\AddOns\` directory.
-2.  **Dependencies:** Requires the **Ace3 library** to be installed or provided by another loaded addon (e.g., ElvUI, Details!, WeakAuras, etc.).
-3.  **Accessing Options:**
-    *   Type `/rca config` in chat.
-    *   Navigate to ESC -> Interface -> AddOns -> RCA.
-4.  **Basic Commands:**
-    *   `/rca`: Shows status and available commands.
-    *   `/rca on`: Enables the addon (Master Toggle).
-    *   `/rca off`: Disables the addon (Master Toggle).
-    *   `/rca status`: Prints current status to chat.
-    *   `/rca test`: Sends a test announcement to the current auto-detected channel (if active).
-    *   `/rca debug`: Toggles session-only debug messages.
-5.  **Initial Setup:** By default, the addon Master Toggle is ON, and it will ask you if you want to activate announcements when you join a group. Configure the "Ask to activate" option and the tracked spell list in the options panel to suit your needs.
+*   Innervate
+*   Rebirth
+*   Blessing of Freedom
+*   Blessing of Protection
+*   Fear Ward
+*   Soulstone Resurrection
+
+## Basic Usage
+
+*   `/rca` - Shows available commands and current status.
+*   `/rca on` / `/rca off` - Enable/disable the addon's announcements.
+*   `/rca config` - Opens the options panel.
+*   `/rca test` - Sends a test message *if* you're in an active group session.
+*   `/rca status` - Shows if RCA is enabled, active for the current session, and target chat channel.
+*   `/rca debug` - Toggles debug messages for troubleshooting (session only).
+
+## Installation
+
+1.  Download the latest release (`.zip` file).
+2.  Extract the `RaidCooldownAnnouncer` folder.
+3.  Place it into your `World of Warcraft\_classic_\Interface\AddOns\` directory.
+4.  Make sure it's enabled in the Addons list at your character select screen.
 
 ## Compatibility Notes
 

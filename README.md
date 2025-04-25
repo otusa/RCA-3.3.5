@@ -1,5 +1,3 @@
-# Raid Cooldown Announcer (RCA) - 3.3.5a Addon
-
 **IMPORTANT INSTALLATION NOTE:** When downloading from GitHub (e.g., via "Download ZIP"), the main folder inside the ZIP might have `-main` or similar appended to its name. **You MUST rename this folder** to exactly `RaidCooldownAnnouncer` before placing it in your AddOns directory.
 
 The correct path should look like this:

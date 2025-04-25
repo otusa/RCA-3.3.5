@@ -44,7 +44,7 @@ Tired of asking "Who used Innervate?" or missing that clutch BoP? This simple ad
 
 1.  Download the latest release (`.zip` file).
 2.  Extract the `RaidCooldownAnnouncer` folder.
-3.  Place it into your `World of Warcraft\_classic_\Interface\AddOns\` directory.
+3.  Place it into your `World of Warcraft\Interface\AddOns\RaidCooldownAnnouncer` directory.
 4.  Make sure it's enabled in the Addons list at your character select screen.
 
 ## Compatibility Notes

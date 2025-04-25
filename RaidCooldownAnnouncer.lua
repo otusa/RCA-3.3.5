@@ -659,7 +659,7 @@ function addon:CombatLogHandler(event, ...) -- Note: 'self' is now implicit
 
         -- Check for valid events for tracked spells
         if spellName and self.db.profile.trackedSpells[spellName] and
-           (subEvent == "SPELL_CAST_SUCCESS" or subEvent == "SPELL_AURA_APPLIED") then
+           subEvent == "SPELL_CAST_SUCCESS" then
 
             -- Create a unique key for this spell cast to prevent duplicates
             local castKey = (sourceName or "nil") .. "-" .. spellName .. "-" .. (destName or "nil")

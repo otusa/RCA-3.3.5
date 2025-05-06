@@ -657,104 +657,141 @@ function addon:CombatLogHandler(event, ...) -- Note: 'self' is now implicit
              ))
         end
 
-        -- Check for valid events for tracked spells
-        if spellName and self.db.profile.trackedSpells[spellName] and
-           subEvent == "SPELL_CAST_SUCCESS" then
+        if spellName and self.db.profile.trackedSpells[spellName] then
 
-            -- Create a unique key for this spell cast to prevent duplicates
-            local castKey = (sourceName or "nil") .. "-" .. spellName .. "-" .. (destName or "nil")
+            local isValidTriggerEvent = false -- Flag to see if this specific event should trigger an announcement for this spell
 
-            -- Check if we've already announced this recently
-            if recentlyAnnounced[castKey] then
-                if isDebugging then
-                    print("|cFFFF9900[RCA]|r Skipping duplicate announcement for: " .. castKey)
-                end
-                return
-            end
-
-            -- Mark this spell as recently announced
-            recentlyAnnounced[castKey] = GetTime()
-
-            if isDebugging then
-                print(string.format("|cFFFF9900[RCA]|r Detected tracked spell: %s", spellName))
-            end
-
-            if self.db.profile.announceMyCastsOnly then
-                -- Check if the source is NOT the player
-                local isPlayer = type(UnitIsUnit) == "function" and UnitIsUnit("player", sourceName)
-                if not isPlayer then
-                    if isDebugging then
-                        print("|cFFFF9900[RCA]|r Skipping announcement: 'Announce My Casts Only' is enabled and source (" .. (sourceName or "nil") .. ") is not player.")
-                    end
-                    return -- Stop processing this event
-                end
-            end
-
-        if self.db.profile.announceOnMeOnly then
-            local isPlayerTarget = type(UnitIsUnit) == "function" and UnitIsUnit("player", destName)
-            if not isPlayerTarget then
-                 if isDebugging then
-                    print("|cFFFF9900[RCA]|r Skipping announcement: 'On Me Only' enabled and target (" .. (destName or "nil") .. ") is not player.")
-                end
-                return -- Stop processing this event
-            end
-        end
-
-            -- Make sure we have both source and target names
-            if sourceName and destName then
-                -- >> START REPLACEMENT << --
-                -- Check if caster is in our current group using the known group type
-                local isInGroup = false
-                if currentGroupType then -- Use the type determined by UpdateGroupState ("RAID" or "PARTY")
-                    local unitPrefix = string.lower(currentGroupType) -- Get "raid" or "party"
-                    local numMembers = GetNumGroupMembers() -- Get total members in raid or party
-                    for i = 1, numMembers do
-                        -- Construct the unit token like "raid1" or "party1"
-                        -- Important: Check if UnitName exists before calling, just in case
-                        local memberName = type(UnitName) == "function" and UnitName(unitPrefix .. i)
-                        if memberName and memberName == sourceName then
-                            isInGroup = true
-                            break -- Found them, no need to loop further
-                        end
-                    end
-                end
-    
-                -- If still not found in the group roster, check if the source is the player
-                -- (handles cases where the player isn't fully registered in the roster yet, maybe?)
-                if not isInGroup and (type(UnitIsUnit) == "function" and UnitIsUnit("player", sourceName)) then
-                    isInGroup = true
-                    -- No need to re-check groupType here, we already know we're in an active session
-                end
-
-
-                if isInGroup then
-                    -- Create spell link or fallback
-                    local spellLink = spellId and GetSpellLink(spellId) or ("[" .. spellName .. "]")
-
-                    -- Format and send the message
-                    local message = string.format("%s cast %s on %s!", sourceName, spellLink, destName)
-                    if currentTargetChannel then
-                        if isDebugging then
-                            print("|cFF00FF00[RCA]|r Sending announcement to " .. currentTargetChannel .. ": " .. message)
-                        end
-                        SendChatMessage(message, currentTargetChannel)
-                    elseif isDebugging then
-                        -- This case should ideally not happen if isActiveSession is true, but safety check
-                         print("|cFFFF9900[RCA]|r Session active but no target channel set. Cannot send announcement.")
-                    end
-
+            -- DEFAULT: Most spells trigger on successful cast
+            if subEvent == "SPELL_CAST_SUCCESS" then
+                -- We want to EXCLUDE specific spells here if their CAST_SUCCESS is not the desired trigger,
+                -- or if they are handled by a different event (like Soulstone).
+                if spellName ~= "Soulstone Resurrection" then
+                    -- Add other spells to exclude from CAST_SUCCESS here if needed:
+                    -- and spellName ~= "Another Spell To Ignore Success"
+                    isValidTriggerEvent = true
                 elseif isDebugging then
-                    print("|cFFFF0000[RCA]|r Source not in group: " .. (sourceName or "unknown"))
+                    -- Optional debug message if you want to see the ignored cast success for SS Rez
+                    print("|cFFFF9900[RCA]|r Ignoring SPELL_CAST_SUCCESS for Soulstone Resurrection (likely stone application).")
                 end
-            elseif isDebugging then
-                print("|cFFFF0000[RCA]|r Missing source or destination name for " .. (spellName or "unknown spell"))
+            -- SPECIAL CASE: Soulstone Resurrection - announce when the aura is applied (the actual rez)
+            elseif subEvent == "SPELL_AURA_APPLIED" and spellName == "Soulstone Resurrection" then
+                isValidTriggerEvent = true
+            -- Add other elseif conditions here if needed for other specific spells/events
+            -- elseif subEvent == "SOME_OTHER_EVENT" and spellName == "Another Special Spell" then
+            --    isValidTriggerEvent = true
             end
-        end
-    end
-end
+
+            -- Proceed only if the event was the right trigger for this spell
+            if isValidTriggerEvent then
+                -- *******************************************************************
+                -- >> ALL THE ANNOUNCEMENT LOGIC THAT WAS PREVIOUSLY INSIDE THE OLD 'if' GOES HERE <<
+                -- Start copy/paste from the line: local castKey = ...
+                -- *******************************************************************
+
+                -- Create a unique key for this spell cast to prevent duplicates
+                local castKey = (sourceName or "nil") .. "-" .. spellName .. "-" .. (destName or "nil")
+
+                -- Check if we've already announced this recently
+                if recentlyAnnounced[castKey] then
+                    if isDebugging then
+                        print("|cFFFF9900[RCA]|r Skipping duplicate announcement for: " .. castKey)
+                    end
+                    return -- Stop processing this event further in this function call
+                end
+
+                -- Mark this spell as recently announced
+                recentlyAnnounced[castKey] = GetTime()
+
+                if isDebugging then
+                    -- Updated debug message to show which event triggered it
+                    print(string.format("|cFFFF9900[RCA]|r Processing tracked spell: %s via event %s", spellName, subEvent))
+                end
+
+                -- Apply 'Announce My Casts Only' filter
+                if self.db.profile.announceMyCastsOnly then
+                    local isPlayer = type(UnitIsUnit) == "function" and UnitIsUnit("player", sourceName)
+                    if not isPlayer then
+                        if isDebugging then
+                            print("|cFFFF9900[RCA]|r Skipping announcement: 'Announce My Casts Only' enabled and source (" .. (sourceName or "nil") .. ") is not player.")
+                        end
+                        return -- Stop processing this event
+                    end
+                end
+
+                -- Apply 'Announce On Me Only' filter
+                if self.db.profile.announceOnMeOnly then
+                    local isPlayerTarget = type(UnitIsUnit) == "function" and UnitIsUnit("player", destName)
+                    if not isPlayerTarget then
+                         if isDebugging then
+                            print("|cFFFF9900[RCA]|r Skipping announcement: 'On Me Only' enabled and target (" .. (destName or "nil") .. ") is not player.")
+                        end
+                        return -- Stop processing this event
+                    end
+                end
+
+                -- Make sure we have both source and target names
+                if sourceName and destName then
+                    -- Check if caster is in our current group using the known group type
+                    local isInGroup = false
+                    if currentGroupType then -- Use the type determined by UpdateGroupState ("RAID" or "PARTY")
+                        local unitPrefix = string.lower(currentGroupType) -- Get "raid" or "party"
+                        local numMembers = GetNumGroupMembers() -- Get total members in raid or party
+                        for i = 1, numMembers do
+                            -- Construct the unit token like "raid1" or "party1"
+                            -- Important: Check if UnitName exists before calling, just in case
+                            local memberName = type(UnitName) == "function" and UnitName(unitPrefix .. i)
+                            if memberName and memberName == sourceName then
+                                isInGroup = true
+                                break -- Found them, no need to loop further
+                            end
+                        end
+                    end
+
+                    -- If still not found in the group roster, check if the source is the player
+                    if not isInGroup and (type(UnitIsUnit) == "function" and UnitIsUnit("player", sourceName)) then
+                        isInGroup = true
+                    end
 
 
-function addon:CleanupRecentAnnouncements()
+                    if isInGroup then
+                        -- Create spell link or fallback
+                        local spellLink = spellId and GetSpellLink(spellId) or ("[" .. spellName .. "]")
+
+                        -- Format and send the message
+                        -- Special Handling for Soulstone Rez: Target might be dead, destName might be the person rezzed.
+                        -- Check if source == dest for Soulstone (usually is when the buff triggers)
+                        -- Format and send the message
+                        local message
+-- Always use the standard message format now
+                        message = string.format("%s cast %s on %s!", sourceName, spellLink, destName)
+
+
+                        if currentTargetChannel then
+                            if isDebugging then
+                                print("|cFF00FF00[RCA]|r Sending announcement to " .. currentTargetChannel .. ": " .. message)
+                            end
+                            SendChatMessage(message, currentTargetChannel)
+                        elseif isDebugging then
+                            -- This case should ideally not happen if isActiveSession is true, but safety check
+                             print("|cFFFF9900[RCA]|r Session active but no target channel set. Cannot send announcement.")
+                        end
+
+                    elseif isDebugging then
+                        print("|cFFFF0000[RCA]|r Source not in group: " .. (sourceName or "unknown"))
+                    end
+                elseif isDebugging then
+                    print("|cFFFF0000[RCA]|r Missing source or destination name for " .. (spellName or "unknown spell"))
+                end
+                -- *******************************************************************
+                -- >> END OF THE PASTED ANNOUNCEMENT LOGIC <<
+                -- *******************************************************************
+            end -- end if isValidTriggerEvent (around line 774)
+        end -- end if spellName and trackedSpells (around line 775)
+    end -- end if event == "COMBAT_LOG_EVENT_UNFILTERED" (around line 776)
+end -- <<< THIS 'end' NOW CORRECTLY CLOSES ONLY addon:CombatLogHandler
+
+-- >>> CORRECT PLACEMENT: Cleanup function is now a separate method <<<
+function addon:CleanupRecentAnnouncements() -- (Should now be around line 778)
     local now = GetTime()
     local count = 0
     for key, timestamp in pairs(recentlyAnnounced) do
@@ -767,5 +804,4 @@ function addon:CleanupRecentAnnouncements()
     -- if self.db.profile.debug and count > 0 then
     --     print("[RCA Debug] Cleaned up", count, "old announcements.")
     -- end
-end
-
+end -- <<< This 'end' closes addon:CleanupRecentAnnouncements
